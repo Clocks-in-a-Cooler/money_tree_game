@@ -1,0 +1,5 @@
+* Important informations *
+
+1. all time is measured in milliseconds
+2. money is obtained by harvesting the money tree
+3. if the tree dies, the player can start again by buying another seed (make the seeds costly)
