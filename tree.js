@@ -1,6 +1,6 @@
 var Tree = {
     water: 0.5,
-
+    
     //NUTRIENTS: N - nitrogen, P - phosphorus, K - potassium
     //balance them...
     nutrient: { N: 0.3, P: 0.1, K: 0.1 },
@@ -8,10 +8,23 @@ var Tree = {
     health: 4,
     alive: true,
 
+    leaves: [],
     flowers: [],
-    fruit: [],
+    fruits: [],
 
     stage: 0, // 0: growing, 1: flowering, 2: fruiting
+
+    add_leaf: function(new_leaf) {
+        this.leaves.push(new_leaf);
+    },
+    
+    add_flower: function(new_flower) {
+        this.flowers.push(new_flower);
+    },
+    
+    add_fruit: function(new_fruit) {
+        this.fruits.push(new_fruit);
+    },
 
     calculate_health: function() {
         if (this.water > 0.9) {
@@ -91,15 +104,91 @@ var Tree = {
     update: function(lapse) {
         calculate_health();
     },
+    
+    water: function() {
+        
+    },
 };
 
-function Money_flower() {
-    this.pollinated = false;
-    this.pollination_delay = Math.random() * 10000 + 10000;
-    this.lifetime = 0; //10 to 20 seconds of flowering, then fruiting stage
+//money leaf -------------------------------------------------------------------
+
+var LEAF_LENGTH = 30; //in pixels, the length of the leaf.
+var LEAF_WIDTH  = 15;
+
+function Money_leaf(x, y, angle) {
+    this.start   = {};
+    this.start.x = x ;
+    this.start.y = y;
+    this.end     = {};
+    this.end.x   = Math.cos(angle) * LEAF_LENGTH + x;
+    this.end.y   = Math.sin(angle) * LEAF_LENGTH + y;
 }
 
-Money_flower.prototype.colour = "lavender";
+Money_leaf.prototype.get_control_points = function() {
+    //for now, just find the midpoint of the leaf line, and go a set number of
+    //units.
+    //yeah, I know it'd look weird.
+    
+    var control_points = [];
+    
+    var midpoint = {
+        x: (this.start.x + this.end.x) / 2,
+        y: (this.start.y + this.end.y) / 2,
+    };
+    
+    control_points.push({
+        x: midpoint.x + this.LEAF_WIDTH,
+        y: midpoint.y + this.LEAF_WIDTH
+    });
+    
+    control_points.push({
+        x: midpoint.x - this.LEAF_WIDTH,
+        y: midpoint.y - this.LEAF_WIDTH
+    });
+    
+    return control_points;
+};
+
+//yup. that's it.
+
+//money branch -----------------------------------------------------------------
+function Branch(start, angle) {
+    this.x = start.x; this.y = start.y;
+    this.angle = angle;
+    this.max_length = Math.random() * 250 + 250;
+    this.length = 0;
+    this.end = start;
+}
+
+Branch.prototype.growspeed = 0.03;
+Branch.prototype.leaf_angle_var = Math.PI / 6;
+
+Branch.prototype.grow = function(lapse, new_leaf) {
+    if (this.length < this.max_length) {
+        //grow!
+        this.length += this.growspeed * lapse;
+        this.end = {
+            x: Math.cos(this.angle) * this.length + this.x,
+            y: Math.sin(this.angle) * this.length + this.y,
+        };
+    }
+
+    if (new_leaf) {
+        Tree.add_leaf(new Money_leaf());
+    }
+}
+
+//money flower -----------------------------------------------------------------
+function Money_flower(x, y) {
+    this.x = x; this.y = y;
+    
+    this.pollinated        = false;
+    this.pollination_delay = Math.random() * 10000 + 10000;
+    this.lifetime          = 0; //10 to 20 seconds of flowering, then fruiting stage
+}
+
+Money_flower.prototype.petal_colour  = "lavender";
+Money_flower.prototype.centre_colour = "goldenrod";
 
 Money_flower.prototype.update = function(lapse) {
     this.lifetime += lapse;
@@ -108,8 +197,19 @@ Money_flower.prototype.update = function(lapse) {
     }
 };
 
-function Money_fruit() {
+Money_flower.prototype.fruit = function() {
+    if (this.pollinated) {
+        //return a fruit, on its way to be ripened.
+    } else {
+        //not pollinated, just die off, I guess.
+    }
+};
+
+//money fruit ------------------------------------------------------------------
+function Money_fruit(x, y) {
     this.lifetime = 0;
+    
+    this.x = x; this.y = y;
     
     this.r = 60; this.g = 179; this.b = 113;
     
