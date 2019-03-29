@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            canvas {
+                position: absolute;
+                top: 10px; left: 10px;
+                background-color: powderblue;
+            }
+        </style>
+        <title>Money Tree Canvas Test</title>
+    </head>
+    <body>
+        <canvas></canvas>
+        <script src="utils.js"></script>
+        <script src="tree.js"></script>
+        <script src="draw_tree.js"></script>
+        <script>
+            var canvas   = document.querySelector("canvas");
+            var context  = canvas.getContext("2d");
+            canvas.width = 300; canvas.height = 500;
+            
+            var last_time = null, lapse = 0;
+            function cycle(time) {
+                if (last_time == null) {
+                    lapse = 0;
+                } else {
+                    lapse = time - last_time;
+                }
+                last_time = time;
+                
+                Tree.update(lapse);
+                draw_tree(context);
+                
+                requestAnimationFrame(cycle);
+            }
+            
+            Tree.start_growing(150, 500, 450);
+            
+            requestAnimationFrame(cycle);
+        </script>
+    </body>
+</html>

@@ -8,12 +8,17 @@ var Tree = {
     health: 4,
     alive: true,
 
+    branches: [],
     leaves: [],
     flowers: [],
     fruits: [],
 
     stage: 0, // 0: growing, 1: flowering, 2: fruiting
 
+    add_branch: function(new_branch) {
+        this.branches.push(new_branch);
+    },
+    
     add_leaf: function(new_leaf) {
         this.leaves.push(new_leaf);
     },
@@ -64,7 +69,6 @@ var Tree = {
 
     harvest: function() {
         if (this.stage != 2) return;
-        this.fruits.filter((f) => { return f.is_ripe(); });
     },
 
     next_stage: function() {
@@ -87,7 +91,7 @@ var Tree = {
                 break;
             case 1:
                 //all flowers done?
-                if (this.flowers.every((f) => { return f.pollinated; }) {
+                if (this.flowers.every((f) => { return f.pollinated; })) {
                     //check for nutrient K now
                     while (this.nutrient.N > 0 && this.nutrient.K > 0 && this.flowers.length > 0) {
                         this.flowers.pop();
@@ -98,22 +102,35 @@ var Tree = {
                 break;
             case 2:
                 break;
+            default : break;
         }
     },
-
+    
+    start_growing: function(start_x, start_y, height) {
+        this.add_branch(new Branch({x: start_x, y: start_y}, -Math.PI / 2, 0));
+    },
+    
     update: function(lapse) {
-        calculate_health();
+        this.calculate_health();
+        if (this.health <= 0) {
+            log("tree is dead!"); // ...and you failed as a gardener!
+            this.alive = false;
+            return;
+        }
+        
+        this.branches.forEach((b) => { b.grow(lapse); });
     },
     
     water: function() {
-        
+        this.water += 0.1;
+        log("tree watered.");
     },
 };
 
 //money leaf -------------------------------------------------------------------
 
 var LEAF_LENGTH = 30; //in pixels, the length of the leaf.
-var LEAF_WIDTH  = 15;
+var LEAF_WIDTH  = 20;
 
 function Money_leaf(x, y, angle) {
     this.start   = {};
@@ -122,14 +139,13 @@ function Money_leaf(x, y, angle) {
     this.end     = {};
     this.end.x   = Math.cos(angle) * LEAF_LENGTH + x;
     this.end.y   = Math.sin(angle) * LEAF_LENGTH + y;
+    this.angle   = angle;
 }
 
 Money_leaf.prototype.get_control_points = function() {
-    //for now, just find the midpoint of the leaf line, and go a set number of
-    //units.
-    //yeah, I know it'd look weird.
-    
     var control_points = [];
+    
+    var angle = this.angle;
     
     var midpoint = {
         x: (this.start.x + this.end.x) / 2,
@@ -137,13 +153,13 @@ Money_leaf.prototype.get_control_points = function() {
     };
     
     control_points.push({
-        x: midpoint.x + this.LEAF_WIDTH,
-        y: midpoint.y + this.LEAF_WIDTH
+        x: Math.cos(angle - Math.PI / 2) * LEAF_WIDTH + midpoint.x,
+        y: Math.sin(angle - Math.PI / 2) * LEAF_WIDTH + midpoint.y
     });
     
     control_points.push({
-        x: midpoint.x - this.LEAF_WIDTH,
-        y: midpoint.y - this.LEAF_WIDTH
+        x: Math.cos(angle + Math.PI / 2) * LEAF_WIDTH + midpoint.x,
+        y: Math.sin(angle + Math.PI / 2) * LEAF_WIDTH + midpoint.y
     });
     
     return control_points;
@@ -151,30 +167,90 @@ Money_leaf.prototype.get_control_points = function() {
 
 //yup. that's it.
 
-//money branch -----------------------------------------------------------------
-function Branch(start, angle) {
-    this.x = start.x; this.y = start.y;
-    this.angle = angle;
-    this.max_length = Math.random() * 250 + 250;
-    this.length = 0;
-    this.end = start;
+//money tree branch ------------------------------------------------------------
+function Branch(start, angle, generation) {
+    this.start      = start;
+    this.angle      = angle;
+    this.length     = 0;
+    this.end        = start;
+    this.generation = generation || 0;
+    this.max_length = this.base_length * Math.pow(this.gen_ratio, this.generation);
+    
+    this.last_growth = 0;
+    this.growth_dist = this.base_growth_dist * Math.pow(this.gen_ratio, this.generation);
 }
 
-Branch.prototype.growspeed = 0.03;
-Branch.prototype.leaf_angle_var = Math.PI / 6;
+Branch.prototype.growspeed      = 0.03;
+Branch.prototype.leaf_angle_var = 2 * Math.PI / 3;
+Branch.prototype.gen_ratio      = 0.5;
+Branch.prototype.base_length    = 300;
+Branch.prototype.max_generation = 2;
 
-Branch.prototype.grow = function(lapse, new_leaf) {
+Branch.prototype.width = 5;
+
+Branch.prototype.base_growth_dist = 30;
+Branch.prototype.growth_chances   = [
+    { "branch": 1, "leaf": 0, },
+    { "branch": 0.5, "leaf": 0.5, },
+    { "branch": 0, "leaf": 1, }
+];
+
+Branch.prototype.get_points = function() {
+    var points = [];
+    var width  = this.width;
+    var angle  = this.angle;
+    var start  = this.start;
+    
+    points.push(this.start);
+    points.push({
+        x: Math.cos(angle - Math.PI / 2) * width + start.x,
+        y: Math.sin(angle - Math.PI / 2) * width + start.y,
+    });
+    
+    points.push(this.end);
+    
+    points.push({
+        x: Math.cos(angle + Math.PI / 2) * width + start.x,
+        y: Math.sin(angle + Math.PI / 2) * width + start.y,
+    });
+    
+    return points;
+};
+
+Branch.prototype.grow = function(lapse) {
     if (this.length < this.max_length) {
         //grow!
         this.length += this.growspeed * lapse;
+        this.last_growth += this.growspeed * lapse;
         this.end = {
-            x: Math.cos(this.angle) * this.length + this.x,
-            y: Math.sin(this.angle) * this.length + this.y,
+            x: Math.cos(this.angle) * this.length + this.start.x,
+            y: Math.sin(this.angle) * this.length + this.start.y,
         };
     }
-
-    if (new_leaf) {
-        Tree.add_leaf(new Money_leaf());
+    
+    var grow_leaf = false;
+    if (this.last_growth >= this.growth_dist) {
+        this.last_growth -= this.growth_dist;
+        grow_leaf = true;
+    }
+    
+    if (grow_leaf) {
+        //grow a new leaf or branch
+        if (this.generation < 3 && Math.random() < this.growth_chances[this.generation]["branch"]) {
+            //new branch
+            Tree.add_branch(new Branch(
+                {x: this.end.x, y: this.end.y},
+                Math.random() * this.leaf_angle_var + this.angle - (this.leaf_angle_var / 2),
+                this.generation + 1
+            ));
+        } else {
+            //new leaf
+            Tree.add_leaf(new Money_leaf(
+                this.end.x,
+                this.end.y,
+                Math.random() * this.leaf_angle_var + this.angle - (this.leaf_angle_var / 2)
+            ));
+        }
     }
 }
 

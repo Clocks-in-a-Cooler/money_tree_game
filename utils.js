@@ -1,4 +1,4 @@
-//various math functions
+//various utility functions
 
 function random_number(start, end) {
     var multiplier = Math.abs(start - end);
@@ -20,4 +20,9 @@ function angle_from(start, end) {
     if (end.x < start.x) angle = Math.PI - angle;
     
     return angle;
+}
+
+var is_logging = true;
+function log(msg) {
+    if (is_logging) console.log(msg);
 }
