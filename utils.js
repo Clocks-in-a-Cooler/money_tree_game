@@ -26,3 +26,15 @@ var is_logging = true;
 function log(msg) {
     if (is_logging) console.log(msg);
 }
+
+function get_colour(c) {
+    return "rgb(" + c.r + ", " + c.g + ", " + c.b + ")";
+}
+
+function darken_colour(c) {
+    return {
+        r: c.r / 2,
+        g: c.g / 2,
+        b: c.b / 2,
+    };
+}

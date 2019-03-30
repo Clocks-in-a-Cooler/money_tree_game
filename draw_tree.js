@@ -13,16 +13,18 @@ function draw_tree(context) {
         context.fill();
     });
     
-    /*
     //draw each leaf
-    context.fillStyle = Tree.leaf_colour;
+    context.fillStyle   = get_colour(Tree.leaf_colour);
+    context.strokeStyle = get_colour(darken_colour(Tree.leaf_colour));
+    context.lineWidth   = 2;
     Tree.leaves.forEach((l) => {
         var points = l.get_control_points();
         context.beginPath();
         context.moveTo(l.start.x, l.start.y);
-        context.quadraticCurveTo(l.end.x, l.end.y, points[0].x, points[0].y);
-        context.quadraticCurveTo(l.start.x, l.start.y, points[1].x, points[1].y);
+        context.quadraticCurveTo(points[0].x, points[0].y, l.end.x, l.end.y);
+        context.quadraticCurveTo(points[1].x, points[1].y, l.start.x, l.start.y);
         context.closePath();
+        context.stroke();
         context.fill();
-    });*/
+    });
 }

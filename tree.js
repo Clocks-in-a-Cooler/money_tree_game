@@ -34,17 +34,17 @@ var Tree = {
     calculate_health: function() {
         if (this.water > 0.9) {
             //overwatered
-            this.health -= this.water - 0.9;
+            this.health -= (this.water - 0.9) / 10;
         } else if (this.water < 0.4) {
             //drying out
-            this.health -= 0.4 - this.water;
+            this.health -= (0.4 - this.water) / 10;
         } else {
-            this.health += 0.1;
+            this.health += 0.01;
         }
 
         if ((this.nutrient.N + this.nutrient.P + this.nutrient.K) / 2 > this.water) {
             //roots are burning
-            this.health -= 1;
+            this.health -= 0.1;
         }
 
         this.health = Math.min(Math.max(0, this.health), 4);
@@ -54,7 +54,7 @@ var Tree = {
     get leaf_colour() {
         if (this.health > 3) {
             //healthy green leaves
-            return "rgb(0, 100, 0)";
+            return {r: 0, g: 100, b: 0};
         } else {
             var r = 0, g = 100, b = 0;
 
@@ -63,7 +63,9 @@ var Tree = {
             g += Math.round((3 - this.health) * (130 / 3));
             b += Math.round((3 - this.health) * (140 / 3));
 
-            return "rgb(" + r + ", " + g + ", " + b + ")";
+            var c = {};
+            c.r   = r; c.g = g; c.b = b;
+            return c;
         }
     },
 
@@ -130,7 +132,7 @@ var Tree = {
 //money leaf -------------------------------------------------------------------
 
 var LEAF_LENGTH = 30; //in pixels, the length of the leaf.
-var LEAF_WIDTH  = 20;
+var LEAF_WIDTH  = 15;
 
 function Money_leaf(x, y, angle) {
     this.start   = {};
