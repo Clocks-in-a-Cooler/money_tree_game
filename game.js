@@ -13,7 +13,7 @@ var money_counter;
 var buy_screen;
 function init() {
     initialize_store();   
-    canvas = document.querySelector("canvas");
+    canvas  = document.querySelector("canvas");
     context = canvas.getContext('2d');
 }
 
@@ -28,7 +28,7 @@ var Game = {
     money: 0,
 };
 
-//animation}; stuff -------------------------------------------
+//animation stuff -------------------------------------------
 
 var last_time = null, lapse = 0, paused = false;
 

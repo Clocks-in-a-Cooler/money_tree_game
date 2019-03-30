@@ -15,7 +15,6 @@ div {
 div#wrapper {
     height: 100vh;
     width: 80vh;
-    background-color: gold;
     margin: auto;
 }
 
@@ -33,6 +32,16 @@ div#canvas-wrapper {
     border: 1px solid steelblue;
     overflow: hidden;
     height: calc(100% - 2em);
+}
+
+div#start-screen {
+    width: 70%;
+    border: 1px solid crimson;
+}
+
+button {
+    border: 1px solid crimson;
+    background-color: rgba();
 }
 
 .money_counter {
