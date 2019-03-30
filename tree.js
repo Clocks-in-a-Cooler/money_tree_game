@@ -183,14 +183,14 @@ function Branch(start, angle, generation) {
 }
 
 Branch.prototype.growspeed      = 0.03;
-Branch.prototype.leaf_angle_var = Math.PI / 3;
+Branch.prototype.leaf_angle_var = 2 * Math.PI / 3;
 Branch.prototype.gen_ratio      = 0.5;
 Branch.prototype.base_length    = 300;
 Branch.prototype.max_generation = 2;
 
 Branch.prototype.width = 5;
 
-Branch.prototype.base_growth_dist = 100;
+Branch.prototype.base_growth_dist = 30;
 Branch.prototype.growth_chances   = [
     { "branch": 1, "leaf": 0, },
     { "branch": 0.5, "leaf": 0.5, },
