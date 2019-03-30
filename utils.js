@@ -33,8 +33,8 @@ function get_colour(c) {
 
 function darken_colour(c) {
     return {
-        r: c.r / 2,
-        g: c.g / 2,
-        b: c.b / 2,
+        r: 2 * c.r / 3,
+        g: 2 * c.g / 3,
+        b: 2 * c.b / 3,
     };
 }
