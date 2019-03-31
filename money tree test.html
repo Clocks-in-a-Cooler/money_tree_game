@@ -30,6 +30,8 @@
                 }
                 last_time = time;
                 
+                lapse = Math.min(lapse, 100);
+                
                 Tree.update(lapse);
                 context.clearRect(0, 0, 300, 500);
                 draw_tree(context);

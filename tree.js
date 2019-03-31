@@ -121,6 +121,7 @@ var Tree = {
         }
         
         this.branches.forEach((b) => { b.grow(lapse); });
+        this.leaves.forEach((l) => { l.update(lapse); });
     },
     
     water: function() {
@@ -131,18 +132,31 @@ var Tree = {
 
 //money leaf -------------------------------------------------------------------
 
-var LEAF_LENGTH = 30; //in pixels, the length of the leaf.
-var LEAF_WIDTH  = 15;
+var LEAF_LENGTH     = 30; //in pixels, the length of the leaf.
+var LEAF_WIDTH      = 15;
+var LEAF_GROW_SPEED = 0.005;
 
 function Money_leaf(x, y, angle) {
     this.start   = {};
     this.start.x = x ;
     this.start.y = y;
     this.end     = {};
-    this.end.x   = Math.cos(angle) * LEAF_LENGTH + x;
-    this.end.y   = Math.sin(angle) * LEAF_LENGTH + y;
+    this.length  = 0;
+    this.end.x   = Math.cos(angle) * this.length + x;
+    this.end.y   = Math.sin(angle) * this.length + y;
     this.angle   = angle;
 }
+
+Money_leaf.prototype.update = function(lapse) {
+    if (this.length >= LEAF_LENGTH) {
+        return;
+    } else {
+        this.length += lapse * LEAF_GROW_SPEED;
+        
+        this.end.x = Math.cos(this.angle) * this.length + this.start.x;
+        this.end.y = Math.sin(this.angle) * this.length + this.start.y;
+    }
+};
 
 Money_leaf.prototype.get_control_points = function() {
     var control_points = [];
@@ -155,13 +169,13 @@ Money_leaf.prototype.get_control_points = function() {
     };
     
     control_points.push({
-        x: Math.cos(angle - Math.PI / 2) * LEAF_WIDTH + midpoint.x,
-        y: Math.sin(angle - Math.PI / 2) * LEAF_WIDTH + midpoint.y
+        x: Math.cos(angle - Math.PI / 2) * this.length * 0.5 + midpoint.x,
+        y: Math.sin(angle - Math.PI / 2) * this.length * 0.5 + midpoint.y
     });
     
     control_points.push({
-        x: Math.cos(angle + Math.PI / 2) * LEAF_WIDTH + midpoint.x,
-        y: Math.sin(angle + Math.PI / 2) * LEAF_WIDTH + midpoint.y
+        x: Math.cos(angle + Math.PI / 2) * this.length * 0.5 + midpoint.x,
+        y: Math.sin(angle + Math.PI / 2) * this.length * 0.5 + midpoint.y
     });
     
     return control_points;
