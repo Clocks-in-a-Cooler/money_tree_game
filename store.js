@@ -13,7 +13,6 @@ var item_type = {
             Tree.nutrient.P += 0.1;
 
         },
-        
     },
 }
 
